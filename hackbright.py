@@ -77,6 +77,7 @@ def get_grade_by_github_title(github, title):
         WHERE student_github = :github
         AND project_title = :title
         """
+
     db_cursor = db.session.execute(QUERY, {'github': github,
                                            'title': title})
     row = db_cursor.fetchone()
@@ -92,12 +93,48 @@ def assign_grade(github, title, grade):
         INSERT INTO grades (student_github, project_title, grade)
         VALUES (:github, :title, :grade)
     """
+
     db_cursor = db.session.execute(QUERY, {'github': github,
                                            'title': title,
                                            'grade': grade})
     db.session.commit()
     print "Grade added to student project: {github}, {title}, {grade}".format(github=github, title=title, grade=grade)
 
+
+def add_project(title, description, max_grade):
+    """Adds project title, description and max grade to projects table"""
+
+    QUERY = """
+        INSERT INTO projects (title, description, max_grade)
+        VALUES (:title, :description, :max_grade)
+    """
+
+    db_cursor = db.session.execute(QUERY, {'title': title,
+                                           'description': description,
+                                           'max_grade': max_grade})
+
+    db.session.commit()
+
+    print "New project added: {title}: {description}, {max_grade}".format(title=title, description=description, max_grade=max_grade)
+
+
+def get_student_grades(first_name, last_name):
+    """Get all grades for a student"""
+
+    QUERY = """
+        SELECT g.project_title, g.grade
+        FROM students s JOIN grades g
+        ON g.student_github = s.github
+        WHERE s.first_name=:first_name AND s.last_name= :last_name
+    """
+
+    db_cursor = db.session.execute(QUERY, {'first_name': first_name,
+                                           'last_name': last_name})
+
+    project_title, grade = db_cursor.fetchall()
+    print project_title, grade
+
+    print "{project_title}: {grade}".format(project_title=project_title, grade=grade)
 
 
 def handle_input():
